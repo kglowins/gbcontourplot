@@ -4,14 +4,12 @@ import io.github.kglowins.gbcontourplot.ContourPlot;
 import io.github.kglowins.gbcontourplot.colorbar.ColorBarBuilder;
 import io.github.kglowins.gbcontourplot.colormappers.ColorMapTable;
 import io.github.kglowins.gbcontourplot.colormappers.ColorMapper;
-import io.github.kglowins.gbcontourplot.colormappers.JetColorMapper;
 import io.github.kglowins.gbcontourplot.colormappers.TableBasedColorMapper;
 import io.github.kglowins.gbcontourplot.graphics.ColoredPolygon;
 import io.github.kglowins.gbcontourplot.graphics.LineEnds;
 import io.github.kglowins.gbcontourplot.grid.Function2DValue;
 import io.github.kglowins.gbcontourplot.grid.Grid2DInterpolator;
 import io.github.kglowins.gbcontourplot.grid.Grid2DValues;
-import org.apache.commons.math3.util.FastMath;
 
 import javax.swing.JPanel;
 import java.awt.BasicStroke;
@@ -20,25 +18,21 @@ import java.awt.GridLayout;
 import java.util.List;
 
 import static io.github.kglowins.gbcontourplot.colorbar.ColorBarLocation.BOTTOM;
-import static io.github.kglowins.gbcontourplot.colorbar.ColorBarLocation.RIGHT;
 import static io.github.kglowins.gbcontourplot.demo.DataPointsUtils.readDataPoints;
 import static io.github.kglowins.gbcontourplot.graphics.PlotUtils.insideCircle;
-import static io.github.kglowins.gbcontourplot.graphics.PlotUtils.insideCubicSST;
 import static io.github.kglowins.gbcontourplot.graphics.RegionCropStyle.EXCLUSIVE;
 import static io.github.kglowins.gbcontourplot.graphics.RegionCropStyle.INCLUSIVE;
-import static java.awt.Color.BLACK;
 import static java.awt.Color.DARK_GRAY;
-import static java.awt.Color.GRAY;
 import static java.awt.Color.WHITE;
 import static java.util.Arrays.asList;
 
-public class TiGbcdDemoProvider {
+public class TiGbcdDemo {
 
     private static final String DATA_POINTS_PATH = "datapoints/Ti_gbcd%s.dist";
     private static final String DISTRIBUTION_DATA = String.format(DATA_POINTS_PATH, "");
     private static final String ERROR_DATA = String.format(DATA_POINTS_PATH, "_error");
 
-    public static JPanel createSubplotsGrid() {
+    public static JPanel createPlots() {
         JPanel gridPanel = new JPanel(new GridLayout(1, 2));
 
         ContourPlot subplot1 = createDistributionPlot();

@@ -24,18 +24,17 @@ import static io.github.kglowins.gbcontourplot.graphics.RegionCropStyle.EXCLUSIV
 import static io.github.kglowins.gbcontourplot.graphics.RegionCropStyle.INCLUSIVE;
 import static java.awt.Color.DARK_GRAY;
 import static java.awt.Color.WHITE;
-import static java.util.Arrays.asList;
 
-public class TiGbpdDemoProvider {
+public class In100GbcdDemo {
 
-    private static final String DATA_POINTS = "datapoints/Ti_gbpd.dist";
+    private static final String DATA_POINTS = "datapoints/IN100_gbcd_sigma9.dist";
 
-    public static JPanel createSubplotsGrid() {
+    public static JPanel createPlots() {
         JPanel gridPanel = new JPanel(new GridLayout(1, 2));
 
-        ContourPlot subplot1 = createPlot(ColorMapTable.PARULA.name(), 5);
-        ContourPlot subplot2 = createPlot(ColorMapTable.MAGMA.name(), 4);
-        ContourPlot subplot3 = createPlot(ColorMapTable.PLASMA.name(), 6);
+        ContourPlot subplot1 = createSubplot(ColorMapTable.TEMPERATURE.name(), 6, 300, 14);
+        ContourPlot subplot2 = createSubplot(ColorMapTable.RAINBOW.name(), 7, 350, 14);
+        ContourPlot subplot3 = createSubplot(ColorMapTable.CIVIDIS.name(), 8, 400, 16);
 
         gridPanel.add(subplot1);
         gridPanel.add(subplot2);
@@ -44,28 +43,27 @@ public class TiGbpdDemoProvider {
         return gridPanel;
     }
 
-    private static ContourPlot createPlot(String colorMapTable, int numberOfIsoLevels) {
+    private static ContourPlot createSubplot(String colorMapTable, int numberOfIsoLevels, int size, int fontSize) {
 
         List<Function2DValue> dataPoints = readDataPoints(DATA_POINTS);
         Grid2DInterpolator interpolator = Grid2DInterpolator.from(dataPoints).withMaxNearest(7);
-        Grid2DValues gridValues = interpolator.interpolateOnGrid(0, 1, 0, 1, 50, 50);
+        Grid2DValues gridValues = interpolator.interpolateOnGrid(-1, 1, -1, 1, 80, 80);
         ColorMapper colorMapper = new TableBasedColorMapper(colorMapTable);
         List<LineEnds> isoLines = gridValues.toIsoLines(numberOfIsoLevels);
         List<ColoredPolygon> isoBands = gridValues.toIsoBands(numberOfIsoLevels, colorMapper);
 
-        ContourPlot contourPlot = new ContourPlot(0, 1, 0, 1)
+        ContourPlot contourPlot = new ContourPlot(-1, 1, -1, 1)
             .setBottomMargin(100)
             .setTopMargin(20)
             .setLeftMargin(20)
             .setRightMargin(20)
-            .setContourWidth(300)
-            .setContourHeight(300)
+            .setContourWidth(size)
+            .setContourHeight(size)
             .setBackgroundAndClear(WHITE)
             .addIsoBands(isoBands, insideCircle(1), INCLUSIVE)
             .addIsoLines(isoLines, DARK_GRAY, new BasicStroke(0.5f), insideCircle(1), EXCLUSIVE)
-            .addCircularMarginSST()
-            .cropHexagonalSST()
-            .addHexagonalSST();
+            .addCircularMargin()
+            .addCubicAxes();
 
 
         ColorBarBuilder colorBarBuilder = new ColorBarBuilder()
@@ -75,10 +73,10 @@ public class TiGbpdDemoProvider {
             .colorBarLocation(BOTTOM)
             .left(20)
             .bottom(50)
-            .width(300)
+            .width(size)
             .height(30)
-            .font(new Font("DejaVu Sans Condensed", Font.PLAIN, 18))
-            .floatingPointTemplate("%.2f")
+            .font(new Font("DejaVu Sans Condensed", Font.PLAIN, fontSize))
+            .floatingPointTemplate("%.1f")
             .barLabelSpacing(0);
 
         contourPlot.add(colorBarBuilder.build());

@@ -26,7 +26,7 @@ import static java.awt.Color.GRAY;
 import static java.awt.Color.WHITE;
 import static java.util.Arrays.asList;
 
-public class ZrO2DemoProvider {
+public class ZrO2Demo {
 
     private static final String DATA_POINTS_PATH = "datapoints/ZrO2_%s.dist";
     private static final String ZRO2_1450_1 = String.format(DATA_POINTS_PATH, "1450_1");
@@ -38,7 +38,7 @@ public class ZrO2DemoProvider {
     private static final String ZRO2_1500_3 = String.format(DATA_POINTS_PATH, "1500_3");
     private static final String ZRO2_1500_COMBINED = String.format(DATA_POINTS_PATH, "1500_combined");
 
-    public static JPanel createSubplotsGrid() {
+    public static JPanel createPlots() {
         JPanel gridPanel = new JPanel(new GridLayout(2, 4));
 
         ContourPlot subplot1 = createSubplot(ZRO2_1450_1);

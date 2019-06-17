@@ -20,12 +20,12 @@ import java.util.Map;
 import static java.util.stream.Collectors.toList;
 
 @Slf4j
-public class DataPointsUtils {
+class DataPointsUtils {
 
     private DataPointsUtils() {
     }
 
-    public static List<Function2DValue> readDataPoints(String resource) {
+    static List<Function2DValue> readDataPoints(String resource) {
         try {
             var resourcePathAndFs = getResourcePathAndFs(resource);
             List<Function2DValue> dataPoints = Files.lines(resourcePathAndFs.getPath())
@@ -46,7 +46,7 @@ public class DataPointsUtils {
 
     private static PathAndFs getResourcePathAndFs(String resource) {
         try {
-            var resourceUri = ZrO2DemoProvider.class.getClassLoader().getResource(resource).toURI();
+            var resourceUri = DataPointsUtils.class.getClassLoader().getResource(resource).toURI();
             var fs = createFileSystem(resourceUri);
             return new PathAndFs(Paths.get(resourceUri), fs);
         } catch (URISyntaxException e) {

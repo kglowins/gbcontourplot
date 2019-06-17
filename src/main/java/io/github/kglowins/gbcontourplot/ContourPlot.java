@@ -25,8 +25,8 @@ import java.awt.Polygon;
 import java.awt.RenderingHints;
 import java.awt.Stroke;
 import java.awt.geom.AffineTransform;
+import java.awt.geom.Ellipse2D;
 import java.awt.geom.Line2D;
-import java.awt.geom.Path2D;
 import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -456,5 +456,87 @@ public class ContourPlot extends JPanel {
         return this;
     }
 
+    //TODO comes from gbtoolbox-legacy
+    public ContourPlot addCubicAxes() {
+        plotElements.add(g2d -> {
 
+            int numberOfSamplingPoints = 64;
+
+            Ellipse2D circle = new Ellipse2D.Double(leftMargin, bottomMargin, contourWidth, contourHeight);
+
+            g2d.setColor(Color.BLACK);
+            float[] dashArr = new float[]{5.0f, 7.5f};
+            BasicStroke dashed = new BasicStroke(1.5f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 12.5f, dashArr, 0.0f);
+            g2d.setStroke(dashed);
+         /*   } else {
+                g.setColor(Color.DARK_GRAY);
+                final float dashArr[] = {5.0f, 7.5f};
+                final BasicStroke dashed = new BasicStroke(1.5f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 12.5f, dashArr, 0.0f);
+                g.setStroke(dashed);
+            }
+*/
+            g2d.draw(circle);
+
+            double radius = contourHeight / 2;
+            Line2D axis1 = new Line2D.Double(leftMargin, bottomMargin + radius, leftMargin + 2*radius, bottomMargin + radius);
+            Line2D axis2 = new Line2D.Double(leftMargin+ radius, bottomMargin, leftMargin + radius, bottomMargin + 2*radius);
+
+            Line2D axis3 = new Line2D.Double(leftMargin + (int)Math.round(radius*(1d - 0.5d*Math.sqrt(2d) )),
+                bottomMargin + (int)Math.round(radius*(1d - 0.5d*Math.sqrt(2d) )),
+                leftMargin + radius + (int)Math.round(radius *0.5d *Math.sqrt(2d)),
+                bottomMargin + radius + (int)Math.round(radius *0.5d *Math.sqrt(2d)) );
+
+            Line2D axis4 = new Line2D.Double(leftMargin + (int)Math.round(radius*(1d - 0.5d*Math.sqrt(2d) )),
+                bottomMargin + radius + (int)Math.round(radius *0.5d *Math.sqrt(2d)),
+                leftMargin + radius + (int)Math.round(radius *0.5d *Math.sqrt(2d)),
+                bottomMargin + (int)Math.round(radius*(1d - 0.5d*Math.sqrt(2d) )));
+
+          /*  if(!bold) {
+                final float dashArr[] = {5.0f, 7.5f};
+                final BasicStroke dashed = new BasicStroke(1.5f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 12.5f, dashArr, 0.0f);
+
+                g.setStroke(dashed);
+            }*/
+            g2d.draw(axis1);
+            g2d.draw(axis2);
+            g2d.draw(axis3);
+            g2d.draw(axis4);
+
+
+
+            final double[] t = new double[numberOfSamplingPoints + 1];
+
+            final double dt = Math.PI / numberOfSamplingPoints;
+            for(int i = 0; i <= numberOfSamplingPoints; ++i) t[i] = -0.5d * Math.PI + i * dt;
+
+            Point2D[] pts = new Point2D[numberOfSamplingPoints + 1];
+            for(int i = 0; i <= numberOfSamplingPoints; ++i)
+                pts[i] = new Point2D.Double(leftMargin + radius*(1d + (FastMath.tan(FastMath.atan(1d/FastMath.cos(t[i]))*0.5d)*FastMath.cos(t[i]))) ,
+                    bottomMargin + radius*(1d + (FastMath.tan(FastMath.atan(1d/FastMath.cos(t[i]))*0.5d)*FastMath.sin(t[i]))) );
+            drawCurve(g2d, pts);
+
+
+            pts = new Point2D[numberOfSamplingPoints + 1];
+            for(int i = 0; i <= numberOfSamplingPoints; ++i)
+                pts[i] = new Point2D.Double(leftMargin + radius*(1d - (FastMath.tan(FastMath.atan(1d/FastMath.cos(t[i]))*0.5d)*FastMath.cos(t[i]))) ,
+                    bottomMargin + radius*(1d + (FastMath.tan(FastMath.atan(1d/FastMath.cos(t[i]))*0.5d)*FastMath.sin(t[i]))) );
+            drawCurve(g2d, pts);
+
+
+            pts = new Point2D[numberOfSamplingPoints + 1];
+            for(int i = 0; i <= numberOfSamplingPoints; ++i)
+                pts[i] = new Point2D.Double(leftMargin + radius*(1d + (FastMath.tan(FastMath.atan(1d/FastMath.cos(t[i]))*0.5d)*FastMath.sin(t[i]))) ,
+                    bottomMargin + radius*(1d + (FastMath.tan(FastMath.atan(1d/FastMath.cos(t[i]))*0.5d)*FastMath.cos(t[i]))) );
+            drawCurve(g2d, pts);
+
+
+            pts = new Point2D[numberOfSamplingPoints + 1];
+            for(int i = 0; i <= numberOfSamplingPoints; ++i)
+                pts[i] = new Point2D.Double(leftMargin + radius*(1d + (FastMath.tan(FastMath.atan(1d/FastMath.cos(t[i]))*0.5d)*FastMath.sin(t[i]))) ,
+                    bottomMargin + radius*(1d - (FastMath.tan(FastMath.atan(1d/FastMath.cos(t[i]))*0.5d)*FastMath.cos(t[i]))) );
+            drawCurve(g2d, pts);
+
+        });
+        return this;
+    }
 }
