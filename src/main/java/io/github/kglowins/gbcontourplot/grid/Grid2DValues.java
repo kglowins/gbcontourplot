@@ -18,6 +18,7 @@ import static io.github.kglowins.gbcontourplot.graphics.PlotUtils.getIsoBandColo
 import static java.util.Comparator.naturalOrder;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.IntStream.range;
+import static java.util.stream.IntStream.rangeClosed;
 
 @RequiredArgsConstructor
 @Slf4j
@@ -45,14 +46,12 @@ public class Grid2DValues {
         fMax = Arrays.stream(values).flatMapToDouble(Arrays::stream).max().getAsDouble();
 
         range(0, xCells - 1).forEach(xVertex ->
-                range(0, yCells - 1).forEach(yVertex -> {
-                    cells.add(new Grid2DCell(
-                            f2dFromVertexIndexes(xVertex, yVertex + 1),
-                            f2dFromVertexIndexes(xVertex + 1, yVertex + 1),
-                            f2dFromVertexIndexes(xVertex + 1, yVertex),
-                            f2dFromVertexIndexes(xVertex, yVertex)
-                    ));
-                })
+                range(0, yCells - 1).forEach(yVertex -> cells.add(new Grid2DCell(
+                    f2dFromVertexIndexes(xVertex, yVertex + 1),
+                    f2dFromVertexIndexes(xVertex + 1, yVertex + 1),
+                    f2dFromVertexIndexes(xVertex + 1, yVertex),
+                    f2dFromVertexIndexes(xVertex, yVertex)
+                )))
         );
 
         long finishMillis = Instant.now().toEpochMilli();
@@ -68,7 +67,7 @@ public class Grid2DValues {
         List<Double> isoLevels = range(0, numberOfIsoLines).boxed()
             .map(index -> fMin + (index + 1) * bandWidth)
             .collect(toList());
-        log.debug("isolev = {}", isoLevels);
+        log.debug("toIsoLines(n): isoLevels = {}", isoLevels);
         return toIsoLines(isoLevels);
     }
 
@@ -80,12 +79,12 @@ public class Grid2DValues {
     }
 
     public List<Double> getAutoIsoLevels(int numberOfIsoLines) {
+        log.debug("getAutoIsoLevels(n): fMin = {}, fMax = {}", fMin, fMax);
         double bandWidth = (fMax - fMin) / (numberOfIsoLines + 1);
-        log.debug("fmin = {} fmax = {}", fMin, fMax);
         List<Double> isoLevels = range(0, numberOfIsoLines).boxed()
             .map(index -> fMin + (index + 1) * bandWidth)
             .collect(toList());
-        log.debug("{}", isoLevels);
+        log.debug("getAutoIsoLevels(n): isoLevels = {}", isoLevels);
         return isoLevels;
     }
 
@@ -122,7 +121,7 @@ public class Grid2DValues {
 
         List<Double> scaledlevels = getScaledLevelsForColors(isoLevels, rangeMin, rangeMax);
 
-        return range(0, isoLevels.size() + 1)
+        return rangeClosed(0, isoLevels.size())
             .boxed()
             .flatMap(index -> {
                 Color isoBandColor = getIsoBandColor(colorMapper, scaledlevels, index);

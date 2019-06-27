@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.function.Consumer;
 
+import static io.github.kglowins.gbcontourplot.colorbar.ColorBarLocation.BOTTOM;
 import static io.github.kglowins.gbcontourplot.colorbar.ColorBarLocation.RIGHT;
 import static io.github.kglowins.gbcontourplot.graphics.PlotUtils.getIsoBandColor;
 import static java.util.Comparator.naturalOrder;
@@ -24,6 +25,7 @@ import static java.util.Objects.nonNull;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.IntStream.range;
+import static java.util.stream.IntStream.rangeClosed;
 
 @Accessors(chain = true, fluent = true)
 @Setter
@@ -48,7 +50,7 @@ public class ColorBarBuilder {
     private int barLabelSpacing = 10;
     private float barBorderWidth = 1.5f;
     private List<Double> labelLevels;
-    private boolean smooth = false;
+    private boolean continuous = false;
 
     public ColorBarBuilder setAutoIsoLevels(int numberOfIsolevels) {
         requireNonNull(grid2DValues, "grid2DValues needs to be set prior setAutoIsoLevels");
@@ -77,7 +79,11 @@ public class ColorBarBuilder {
                 g2d.setFont(font);
             }
 
-            Pair<List<Double>, List<Double>> barLevelsWithColorLevels = scaleBarLevels(isoLevels, grid2DValues.getFMin(), grid2DValues.getFMax(), rangeMin, rangeMax);
+
+            Pair<List<Double>, List<Double>> barLevelsWithColorLevels = continuous
+                ? scaleBarLevels(getContinuousIsoLevels(grid2DValues.getFMin(),
+                    grid2DValues.getFMax()), grid2DValues.getFMin(), grid2DValues.getFMax(), rangeMin, rangeMax)
+                : scaleBarLevels(isoLevels, grid2DValues.getFMin(), grid2DValues.getFMax(), rangeMin, rangeMax);
             log.debug("ColorBarBuilder.barLevels = {}", barLevelsWithColorLevels);
 
             List<Double> barLevels = barLevelsWithColorLevels.x();
@@ -191,9 +197,9 @@ public class ColorBarBuilder {
     }
 
     private static List<Double> scaleLabelLevels(List<Double> labelLevels, double dataMin, double dataMax) {
-        List<Double> filteredlabelLevels = filterValuesFromDataRange(labelLevels, dataMin, dataMax);
-        filteredlabelLevels.sort(naturalOrder());
-        return filteredlabelLevels.stream()
+        List<Double> filteredLabelLevels = filterValuesFromDataRange(labelLevels, dataMin, dataMax);
+        filteredLabelLevels.sort(naturalOrder());
+        return filteredLabelLevels.stream()
             .map(value -> (value - dataMin) / (dataMax - dataMin))
             .collect(toList());
     }
@@ -257,5 +263,14 @@ public class ColorBarBuilder {
             }
         }
         return null;
+    }
+
+    private List<Double> getContinuousIsoLevels(double min, double max) {
+        int dimension = colorBarLocation == BOTTOM ? width : height;
+        int numberOfLevels = dimension / 4;
+        return rangeClosed(0, numberOfLevels)
+            .boxed()
+            .map(i -> min + i * (max - min) / numberOfLevels)
+            .collect(toList());
     }
 }

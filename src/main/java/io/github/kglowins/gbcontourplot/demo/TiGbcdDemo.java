@@ -81,7 +81,8 @@ public class TiGbcdDemo {
             .height(30)
             .font(new Font("DejaVu Sans Condensed", Font.PLAIN, 32))
             .floatingPointTemplate("%.0f")
-            .barLabelSpacing(0);
+            .barLabelSpacing(0)
+            .continuous(true);
 
         contourPlot.add(colorBarBuilder.build());
 
@@ -124,7 +125,8 @@ public class TiGbcdDemo {
             .height(30)
             .font(new Font("DejaVu Sans Condensed", Font.PLAIN, 32))
             .floatingPointTemplate("%.1f")
-            .barLabelSpacing(0);
+            .barLabelSpacing(0)
+            .continuous(true);
 
         contourPlot.add(colorBarBuilder.build());
 

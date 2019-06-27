@@ -1,6 +1,5 @@
 package io.github.kglowins.gbcontourplot.graphics;
 
-import io.github.kglowins.gbcontourplot.graphics.Coordinates2D;
 import lombok.AllArgsConstructor;
 import lombok.Value;
 

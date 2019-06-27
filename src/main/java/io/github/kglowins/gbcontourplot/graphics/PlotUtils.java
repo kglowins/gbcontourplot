@@ -21,8 +21,9 @@ public class PlotUtils {
         double middle = 0.5 * (scaledLevels.get(index) + scaledLevels.get(index + 1));
         log.debug("{} {}", middle, (1 - middle) * scaledLevels.get(index) + middle * scaledLevels.get(index + 1) );
         return colorMapper.map(middle);
-        //return colorMapper.map(
-          //  (1 - middle) * scaledLevels.get(index) + middle * scaledLevels.get(index + 1));
+        //TODO consider
+        // return colorMapper.map(
+        // (1 - middle) * scaledLevels.get(index) + middle * scaledLevels.get(index + 1));
     }
 
     public static BiFunction<Double, Double, Boolean> insideCircle(double r) {
