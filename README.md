@@ -84,9 +84,9 @@ be customized.
 #### Gallery
 
 - Several plots with common scale. Discrete color bar.
-![](img/ZrO2.png)
+<img src="img/ZrO2.png" width="640"/>
 - Different color maps. Continuous scale bars.
-![](img/TiGBPD.png)
+<img src="img/TiGBPD.png" width="600"/>
 - Custom ticks and labels
-![](img/TiGBCD.png)|![](img/TiGBCDerror.png)
-
+<img src="img/TiGBCD.png" width="280"/>
+<img src="img/TiGBCDerror.png" width="220"/>
