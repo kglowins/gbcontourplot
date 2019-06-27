@@ -1,4 +1,4 @@
-#gbcontourplot
+# gbcontourplot
 
 #### Capabilities
 *gbcontourplot* is a library written in Java (11). It allows for plotting isolines and isobands.
