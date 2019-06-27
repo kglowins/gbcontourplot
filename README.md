@@ -4,6 +4,7 @@
 *gbcontourplot* is a library written in Java (11). It allows for plotting isolines and isobands.
 Among other options, one can define - at least to some extent - the "region function" specifying the area on which the contours are
 visible, several color mappings and export to raster and vector formats are supported.
+Behind the scenes, it is the [Marching Squares](https://en.wikipedia.org/wiki/Marching_squares) algorithm.
 
 #### Motivation
 During my graduate studies I needed to create contour plots restricted
