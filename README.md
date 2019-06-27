@@ -90,3 +90,6 @@ be customized.
 - Custom ticks and labels
 <img src="img/TiGBCD.png" width="280"/>
 <img src="img/TiGBCDerror.png" width="220"/>
+
+#### License
+GNU GPLv3
