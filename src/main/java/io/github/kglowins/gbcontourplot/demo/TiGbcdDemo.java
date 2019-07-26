@@ -19,9 +19,11 @@ import java.util.List;
 
 import static io.github.kglowins.gbcontourplot.colorbar.ColorBarLocation.BOTTOM;
 import static io.github.kglowins.gbcontourplot.demo.DataPointsUtils.readDataPoints;
+import static io.github.kglowins.gbcontourplot.graphics.PlotUtils.getDashedStroke;
 import static io.github.kglowins.gbcontourplot.graphics.PlotUtils.insideCircle;
 import static io.github.kglowins.gbcontourplot.graphics.RegionCropStyle.EXCLUSIVE;
 import static io.github.kglowins.gbcontourplot.graphics.RegionCropStyle.INCLUSIVE;
+import static java.awt.Color.BLACK;
 import static java.awt.Color.DARK_GRAY;
 import static java.awt.Color.WHITE;
 import static java.util.Arrays.asList;
@@ -66,7 +68,7 @@ public class TiGbcdDemo {
             .addIsoLines(isoLines, DARK_GRAY, new BasicStroke(0.5f), insideCircle(1), EXCLUSIVE)
             .addCircularMargin()
             .addDashedCircumference()
-            .addHexagonalAxes();
+            .addHexagonalAxes(BLACK, getDashedStroke(1.5f));
 
         ColorBarBuilder colorBarBuilder = new ColorBarBuilder()
             .grid2DValues(gridValues)
@@ -111,7 +113,7 @@ public class TiGbcdDemo {
             .addIsoLines(isoLines, DARK_GRAY, new BasicStroke(0.5f), insideCircle(1), EXCLUSIVE)
             .addCircularMargin()
             .addDashedCircumference()
-            .addHexagonalAxes();
+            .addHexagonalAxes(BLACK, getDashedStroke(1.5f));
 
         ColorBarBuilder colorBarBuilder = new ColorBarBuilder()
             .grid2DValues(gridValues)

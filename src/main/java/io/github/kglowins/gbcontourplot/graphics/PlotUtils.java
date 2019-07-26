@@ -2,6 +2,7 @@ package io.github.kglowins.gbcontourplot.graphics;
 
 import io.github.kglowins.gbcontourplot.colormappers.ColorMapper;
 
+import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.geom.Path2D;
@@ -9,6 +10,8 @@ import java.awt.geom.Point2D;
 import java.util.List;
 import java.util.function.BiFunction;
 
+import static java.awt.BasicStroke.CAP_BUTT;
+import static java.awt.BasicStroke.JOIN_MITER;
 import static java.lang.Math.PI;
 import static java.lang.Math.atan;
 import static java.lang.Math.atan2;
@@ -71,5 +74,9 @@ public class PlotUtils {
             }
             g2d.draw(curve);
         }
+    }
+
+    public static BasicStroke getDashedStroke(float thickness) {
+        return new BasicStroke(thickness, CAP_BUTT, JOIN_MITER, 12.5f, new float[]{5.0f, 7.5f}, 0.0f);
     }
 }

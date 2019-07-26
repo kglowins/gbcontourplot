@@ -412,7 +412,7 @@ public class ContourPlot extends JPanel {
     }
 
     //TODO copied from gbtoolbox-legacy
-    public ContourPlot addHexagonalAxes() {
+    public ContourPlot addHexagonalAxes(Color color, BasicStroke stroke) {
         plotElements.add(g2d -> {
             Line2D axis1 = new Line2D.Double(leftMargin, bottomMargin + contourHeight / 2, leftMargin + contourWidth, bottomMargin + contourHeight / 2);
             Line2D axis2 = new Line2D.Double(leftMargin + contourWidth / 2, bottomMargin, leftMargin + contourWidth / 2, bottomMargin + contourHeight);
@@ -438,8 +438,8 @@ public class ContourPlot extends JPanel {
                 leftMargin + radius + radius * cos(PI + 4 * PI / 6),
                 bottomMargin + radius + radius * sin(PI + 4 * PI / 6));
 
-            BasicStroke dashed = new BasicStroke(1.5f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 12.5f, new float[]{5.0f, 7.5f}, 0.0f);
-            g2d.setStroke(dashed);
+            g2d.setColor(color);
+            g2d.setStroke(stroke);
 
             g2d.draw(axis1);
             g2d.draw(axis2);
@@ -452,16 +452,15 @@ public class ContourPlot extends JPanel {
     }
 
     //TODO comes from gbtoolbox-legacy
-    public ContourPlot addCubicAxes() {
+    public ContourPlot addCubicAxes(Color color, BasicStroke stroke) {
         plotElements.add(g2d -> {
 
             int numberOfSamplingPoints = 64;
 
             Ellipse2D circle = new Ellipse2D.Double(leftMargin, bottomMargin, contourWidth, contourHeight);
 
-            g2d.setColor(Color.BLACK);
-            BasicStroke dashed = new BasicStroke(1.5f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 12.5f, new float[]{5.0f, 7.5f}, 0.0f);
-            g2d.setStroke(dashed);
+            g2d.setColor(color);
+            g2d.setStroke(stroke);
             g2d.draw(circle);
 
             double radius = contourHeight / 2.;
