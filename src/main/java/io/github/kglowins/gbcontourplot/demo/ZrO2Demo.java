@@ -9,7 +9,6 @@ import io.github.kglowins.gbcontourplot.graphics.LineEnds;
 import io.github.kglowins.gbcontourplot.grid.Function2DValue;
 import io.github.kglowins.gbcontourplot.grid.Grid2DInterpolator;
 import io.github.kglowins.gbcontourplot.grid.Grid2DValues;
-import org.apache.commons.math3.util.FastMath;
 
 import javax.swing.JPanel;
 import java.awt.BasicStroke;
@@ -24,6 +23,8 @@ import static io.github.kglowins.gbcontourplot.graphics.RegionCropStyle.EXCLUSIV
 import static io.github.kglowins.gbcontourplot.graphics.RegionCropStyle.INCLUSIVE;
 import static java.awt.Color.GRAY;
 import static java.awt.Color.WHITE;
+import static java.lang.Math.PI;
+import static java.lang.Math.tan;
 import static java.util.Arrays.asList;
 
 public class ZrO2Demo {
@@ -66,14 +67,14 @@ public class ZrO2Demo {
 
         List<Function2DValue> dataPoints = readDataPoints(resourceName);
         Grid2DInterpolator interpolator = Grid2DInterpolator.from(dataPoints).withMaxNearest(7);
-        Grid2DValues gridValues = interpolator.interpolateOnGrid(0, FastMath.tan(FastMath.PI / 8), 0, FastMath.tan(FastMath.PI / 8), 100, 100);
+        Grid2DValues gridValues = interpolator.interpolateOnGrid(0, tan(PI / 8), 0, tan(PI / 8), 100, 100);
         ColorMapper colorMapper = new JetColorMapper();
         List<Double> isoLevels = asList(0.88, 0.95, 1.02, 1.09, 1.16, 1.23);
         List<LineEnds> isoLines = gridValues.toIsoLines(isoLevels);
         List<ColoredPolygon> isoBands = gridValues.toIsoBands(isoLevels, colorMapper, 0.859, 1.273);
 
-        ContourPlot contourPlot = new ContourPlot(0, FastMath.tan(FastMath.PI / 8),
-            0, FastMath.tan(FastMath.PI / 8))
+        ContourPlot contourPlot = new ContourPlot(0, tan(PI / 8),
+            0, tan(PI / 8))
             .setBottomMargin(10)
             .setTopMargin(10)
             .setLeftMargin(10)

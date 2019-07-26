@@ -26,7 +26,7 @@ public class Demo {
 
     public static void main(String[] args) {
 
-        log.debug("Avalable fonts = {}", asList(GraphicsEnvironment.getLocalGraphicsEnvironment().getAvailableFontFamilyNames()));
+        log.debug("Available fonts = {}", asList(GraphicsEnvironment.getLocalGraphicsEnvironment().getAvailableFontFamilyNames()));
 
         JPanel cards = new JPanel(new CardLayout());
         cards.add(ZrO2Demo.createPlots(), ZRO2);
