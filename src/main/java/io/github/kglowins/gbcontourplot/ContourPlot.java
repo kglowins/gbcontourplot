@@ -12,7 +12,6 @@ import io.github.kglowins.gbcontourplot.graphics.LineEnds;
 import io.github.kglowins.gbcontourplot.graphics.RegionCropStyle;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.math3.util.FastMath;
 
 import javax.imageio.ImageIO;
 import javax.swing.JPanel;
@@ -38,6 +37,13 @@ import java.util.function.BiFunction;
 import java.util.function.Consumer;
 
 import static io.github.kglowins.gbcontourplot.graphics.PlotUtils.drawCurve;
+import static java.lang.Math.PI;
+import static java.lang.Math.atan;
+import static java.lang.Math.cos;
+import static java.lang.Math.round;
+import static java.lang.Math.sin;
+import static java.lang.Math.sqrt;
+import static java.lang.Math.tan;
 import static java.util.Objects.nonNull;
 import static java.util.stream.IntStream.rangeClosed;
 
@@ -226,8 +232,8 @@ public class ContourPlot extends JPanel {
             }
 
             polygon.getPolygon().forEach(coords -> p.addPoint(
-                leftMargin + Long.valueOf(Math.round((coords.x() - contourMinX) / (contourMaxX - contourMinX) * contourWidth)).intValue(),
-                bottomMargin + Long.valueOf(Math.round((coords.y() - contourMinY) / (contourMaxY - contourMinY) * contourHeight)).intValue()
+                leftMargin + Long.valueOf(round((coords.x() - contourMinX) / (contourMaxX - contourMinX) * contourWidth)).intValue(),
+                bottomMargin + Long.valueOf(round((coords.y() - contourMinY) / (contourMaxY - contourMinY) * contourHeight)).intValue()
             ));
             g2d.drawPolygon(p);
             g2d.fillPolygon(p);
@@ -274,13 +280,13 @@ public class ContourPlot extends JPanel {
                 }
 
                 int x1 = leftMargin
-                    + Long.valueOf(Math.round((le.x1() - contourMinX) / (contourMaxX - contourMinX) * contourWidth)).intValue();
+                    + Long.valueOf(round((le.x1() - contourMinX) / (contourMaxX - contourMinX) * contourWidth)).intValue();
                 int x2 = leftMargin
-                    + Long.valueOf(Math.round((le.x2() - contourMinX) / (contourMaxX - contourMinX) * contourWidth)).intValue();
+                    + Long.valueOf(round((le.x2() - contourMinX) / (contourMaxX - contourMinX) * contourWidth)).intValue();
                 int y1 = bottomMargin
-                    + Long.valueOf(Math.round((le.y1() - contourMinY) / (contourMaxY - contourMinY) * contourHeight)).intValue();
+                    + Long.valueOf(round((le.y1() - contourMinY) / (contourMaxY - contourMinY) * contourHeight)).intValue();
                 int y2 = bottomMargin
-                    + Long.valueOf(Math.round((le.y2() - contourMinY) / (contourMaxY - contourMinY) * contourHeight)).intValue();
+                    + Long.valueOf(round((le.y2() - contourMinY) / (contourMaxY - contourMinY) * contourHeight)).intValue();
 
                 g2d.drawLine(x1, y1, x2, y2);
             });
@@ -319,26 +325,16 @@ public class ContourPlot extends JPanel {
         return this;
     }
 
-    public ContourPlot addCircumference(int angle) {
-        plotElements.add(g2d -> {
-            g2d.setColor(Color.BLACK);
-            g2d.setStroke(new BasicStroke(1.5f));
-            g2d.drawArc(leftMargin - contourWidth, bottomMargin - contourHeight,
-                2*contourWidth, 2*contourHeight, 360-angle, 360);
-        });
-        return this;
-    }
-
     public ContourPlot addHexagonalSST() {
         plotElements.add(g2d -> {
             g2d.setColor(Color.BLACK);
             g2d.setStroke(new BasicStroke(2f));
             g2d.drawLine(leftMargin, bottomMargin, leftMargin + contourWidth, bottomMargin);
             g2d.drawLine(leftMargin, bottomMargin,
-                leftMargin + (int)(contourWidth*Math.cos(Math.PI / 6)),
-                bottomMargin + (int)(contourHeight*Math.sin(Math.PI / 6)));
+                leftMargin + (int) (contourWidth * cos(PI / 6)),
+                bottomMargin + (int) (contourHeight * sin(PI / 6)));
             g2d.drawArc(leftMargin - contourWidth, bottomMargin - contourHeight,
-                2*contourWidth, 2*contourHeight, 0, -30);
+                2 * contourWidth, 2 * contourHeight, 0, -30);
         });
         return this;
     }
@@ -360,14 +356,14 @@ public class ContourPlot extends JPanel {
             g2d.draw(axis2);
 
             double[] t = new double[numberOfSamplingPoints + 1];
-            double dt = 0.25 * Math.PI / numberOfSamplingPoints;
-            rangeClosed(0, numberOfSamplingPoints).forEach(i -> t[i] = -0.25 * Math.PI + i * dt);
+            double dt = 0.25 * PI / numberOfSamplingPoints;
+            rangeClosed(0, numberOfSamplingPoints).forEach(i -> t[i] = -0.25 * PI + i * dt);
 
             Point2D[] points = new Point2D[numberOfSamplingPoints + 1];
             rangeClosed(0, numberOfSamplingPoints).forEach(i ->
                 points[i] = new Point2D.Double(
-                    leftMargin + (contourWidth / 0.41421356) * ((FastMath.tan(FastMath.atan(1 / FastMath.cos(t[i])) * 0.5) * FastMath.cos(t[i]))),
-                    bottomMargin - (contourHeight / 0.41421356) * ((FastMath.tan(FastMath.atan(1 / FastMath.cos(t[i])) * 0.5) * FastMath.sin(t[i])))
+                    leftMargin + (contourWidth / 0.41421356) * tan(atan(1 / cos(t[i])) * 0.5) * cos(t[i]),
+                    bottomMargin - (contourHeight / 0.41421356) * tan(atan(1 / cos(t[i])) * 0.5) * sin(t[i])
                 )
             );
             drawCurve(g2d, points);
@@ -380,8 +376,8 @@ public class ContourPlot extends JPanel {
             g2d.setColor(Color.WHITE);
             Polygon upperArea = new Polygon();
             upperArea.addPoint(leftMargin, bottomMargin);
-            upperArea.addPoint(leftMargin + (int)(contourWidth*Math.cos(Math.PI / 6)),
-                bottomMargin + (int)(contourHeight*Math.sin(Math.PI / 6)));
+            upperArea.addPoint(leftMargin + (int)(contourWidth* cos(PI / 6)),
+                bottomMargin + (int)(contourHeight* sin(PI / 6)));
             upperArea.addPoint(leftMargin + contourWidth, bottomMargin + contourHeight);
             upperArea.addPoint(leftMargin, bottomMargin + contourHeight);
             g2d.fillPolygon(upperArea);
@@ -400,12 +396,12 @@ public class ContourPlot extends JPanel {
             Polygon rhsArea = new Polygon();
             rhsArea.addPoint(leftMargin + contourWidth + 1, bottomMargin + contourHeight);
             int numberOfSamplingPoints = 32;
-            double dt = 0.25 * Math.PI / numberOfSamplingPoints;
+            double dt = 0.25 * PI / numberOfSamplingPoints;
             rangeClosed(0, numberOfSamplingPoints).forEach(i -> {
-                double ti = -0.25 * Math.PI + i * dt;
+                double ti = -0.25 * PI + i * dt;
                 rhsArea.addPoint(
-                    leftMargin + (int) Math.round((contourWidth / 0.41421356) * ((FastMath.tan(FastMath.atan(1d / FastMath.cos(ti)) * 0.5d) * FastMath.cos(ti)))),
-                    bottomMargin - (int) Math.round((contourHeight / 0.41421356) * ((FastMath.tan(FastMath.atan(1d / FastMath.cos(ti)) * 0.5d) * FastMath.sin(ti))))
+                    leftMargin + (int) round((contourWidth / 0.41421356) * tan(atan(1 / cos(ti)) * 0.5) * cos(ti)),
+                    bottomMargin - (int) round((contourHeight / 0.41421356) * tan(atan(1 / cos(ti)) * 0.5) * sin(ti))
                 );
             });
             rhsArea.addPoint(leftMargin + contourWidth + 1, bottomMargin);
@@ -416,35 +412,34 @@ public class ContourPlot extends JPanel {
     }
 
     //TODO copied from gbtoolbox-legacy
-    public ContourPlot addHexagonalAxes() {
+    public ContourPlot addHexagonalAxes(Color color, BasicStroke stroke) {
         plotElements.add(g2d -> {
             Line2D axis1 = new Line2D.Double(leftMargin, bottomMargin + contourHeight / 2, leftMargin + contourWidth, bottomMargin + contourHeight / 2);
             Line2D axis2 = new Line2D.Double(leftMargin + contourWidth / 2, bottomMargin, leftMargin + contourWidth / 2, bottomMargin + contourHeight);
 
-            double radius = contourHeight / 2; //assumes height=width
-            Line2D axis3 = new Line2D.Double(leftMargin + radius + radius*Math.cos(Math.PI / 6d),
-                bottomMargin + radius + radius*Math.sin(Math.PI / 6d),
-                leftMargin + radius + radius*Math.cos(Math.PI + Math.PI / 6d),
-                bottomMargin + radius + radius*Math.sin(Math.PI + Math.PI / 6d));
+            double radius = contourHeight / 2.; //assumes height=width
+            Line2D axis3 = new Line2D.Double(leftMargin + radius + radius * cos(PI / 6),
+                bottomMargin + radius + radius * sin(PI / 6),
+                leftMargin + radius + radius * cos(PI + PI / 6),
+                bottomMargin + radius + radius * sin(PI + PI / 6));
 
-            Line2D axis4 = new Line2D.Double(leftMargin + radius + radius*Math.cos(2d * Math.PI / 6d),
-                bottomMargin + radius + radius*Math.sin(2d * Math.PI / 6d),
-                leftMargin + radius + radius*Math.cos(Math.PI + 2d * Math.PI / 6d),
-                bottomMargin + radius + radius*Math.sin(Math.PI + 2d * Math.PI / 6d));
+            Line2D axis4 = new Line2D.Double(leftMargin + radius + radius* cos(2 * PI / 6),
+                bottomMargin + radius + radius * sin(2 * PI / 6),
+                leftMargin + radius + radius * cos(PI + 2 * PI / 6),
+                bottomMargin + radius + radius * sin(PI + 2 * PI / 6));
 
-            Line2D axis5 = new Line2D.Double(leftMargin + radius + radius*Math.cos(5d * Math.PI / 6d),
-                bottomMargin + radius + radius*Math.sin(5d * Math.PI / 6d),
-                leftMargin + radius + radius*Math.cos(Math.PI + 5d * Math.PI / 6d),
-                bottomMargin + radius + radius*Math.sin(Math.PI + 5d * Math.PI / 6d));
+            Line2D axis5 = new Line2D.Double(leftMargin + radius + radius* cos(5 * PI / 6),
+                bottomMargin + radius + radius * sin(5 * PI / 6),
+                leftMargin + radius + radius * cos(PI + 5 * PI / 6),
+                bottomMargin + radius + radius * sin(PI + 5 * PI / 6));
 
-            Line2D axis6 = new Line2D.Double(leftMargin + radius + radius*Math.cos(4d * Math.PI / 6d),
-                bottomMargin + radius + radius*Math.sin(4d * Math.PI / 6d),
-                leftMargin + radius + radius*Math.cos(Math.PI + 4d * Math.PI / 6d),
-                bottomMargin + radius + radius*Math.sin(Math.PI + 4d * Math.PI / 6d));
+            Line2D axis6 = new Line2D.Double(leftMargin + radius + radius* cos(4 * PI / 6),
+                bottomMargin + radius + radius * sin(4 * PI / 6),
+                leftMargin + radius + radius * cos(PI + 4 * PI / 6),
+                bottomMargin + radius + radius * sin(PI + 4 * PI / 6));
 
-            float[] dashArr = new float[]{5.0f, 7.5f};
-            BasicStroke dashed = new BasicStroke(1.5f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 12.5f, dashArr, 0.0f);
-            g2d.setStroke(dashed);
+            g2d.setColor(color);
+            g2d.setStroke(stroke);
 
             g2d.draw(axis1);
             g2d.draw(axis2);
@@ -457,85 +452,68 @@ public class ContourPlot extends JPanel {
     }
 
     //TODO comes from gbtoolbox-legacy
-    public ContourPlot addCubicAxes() {
+    public ContourPlot addCubicAxes(Color color, BasicStroke stroke) {
         plotElements.add(g2d -> {
 
             int numberOfSamplingPoints = 64;
 
             Ellipse2D circle = new Ellipse2D.Double(leftMargin, bottomMargin, contourWidth, contourHeight);
 
-            g2d.setColor(Color.BLACK);
-            float[] dashArr = new float[]{5.0f, 7.5f};
-            BasicStroke dashed = new BasicStroke(1.5f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 12.5f, dashArr, 0.0f);
-            g2d.setStroke(dashed);
-         /*   } else {
-                g.setColor(Color.DARK_GRAY);
-                final float dashArr[] = {5.0f, 7.5f};
-                final BasicStroke dashed = new BasicStroke(1.5f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 12.5f, dashArr, 0.0f);
-                g.setStroke(dashed);
-            }
-*/
+            g2d.setColor(color);
+            g2d.setStroke(stroke);
             g2d.draw(circle);
 
-            double radius = contourHeight / 2;
-            Line2D axis1 = new Line2D.Double(leftMargin, bottomMargin + radius, leftMargin + 2*radius, bottomMargin + radius);
-            Line2D axis2 = new Line2D.Double(leftMargin+ radius, bottomMargin, leftMargin + radius, bottomMargin + 2*radius);
+            double radius = contourHeight / 2.;
+            Line2D axis1 = new Line2D.Double(leftMargin, bottomMargin + radius, leftMargin + 2 * radius, bottomMargin + radius);
+            Line2D axis2 = new Line2D.Double(leftMargin + radius, bottomMargin, leftMargin + radius, bottomMargin + 2 * radius);
 
-            Line2D axis3 = new Line2D.Double(leftMargin + (int)Math.round(radius*(1d - 0.5d*Math.sqrt(2d) )),
-                bottomMargin + (int)Math.round(radius*(1d - 0.5d*Math.sqrt(2d) )),
-                leftMargin + radius + (int)Math.round(radius *0.5d *Math.sqrt(2d)),
-                bottomMargin + radius + (int)Math.round(radius *0.5d *Math.sqrt(2d)) );
+            Line2D axis3 = new Line2D.Double(leftMargin + (int) round(radius * (1d - 0.5 * sqrt(2))),
+                bottomMargin + (int) round(radius * (1 - 0.5 * sqrt(2))),
+                leftMargin + radius + (int) round(radius * 0.5 * sqrt(2)),
+                bottomMargin + radius + (int) round(radius * 0.5 * sqrt(2)));
 
-            Line2D axis4 = new Line2D.Double(leftMargin + (int)Math.round(radius*(1d - 0.5d*Math.sqrt(2d) )),
-                bottomMargin + radius + (int)Math.round(radius *0.5d *Math.sqrt(2d)),
-                leftMargin + radius + (int)Math.round(radius *0.5d *Math.sqrt(2d)),
-                bottomMargin + (int)Math.round(radius*(1d - 0.5d*Math.sqrt(2d) )));
+            Line2D axis4 = new Line2D.Double(leftMargin + (int) round(radius * (1d - 0.5 * sqrt(2))),
+                bottomMargin + radius + (int) round(radius * 0.5 * sqrt(2)),
+                leftMargin + radius + (int) round(radius * 0.5 * sqrt(2)),
+                bottomMargin + (int) round(radius * (1 - 0.5 * sqrt(2))));
 
-          /*  if(!bold) {
-                final float dashArr[] = {5.0f, 7.5f};
-                final BasicStroke dashed = new BasicStroke(1.5f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 12.5f, dashArr, 0.0f);
-
-                g.setStroke(dashed);
-            }*/
             g2d.draw(axis1);
             g2d.draw(axis2);
             g2d.draw(axis3);
             g2d.draw(axis4);
 
-
-
             final double[] t = new double[numberOfSamplingPoints + 1];
 
-            final double dt = Math.PI / numberOfSamplingPoints;
-            for(int i = 0; i <= numberOfSamplingPoints; ++i) t[i] = -0.5d * Math.PI + i * dt;
+            final double dt = PI / numberOfSamplingPoints;
+            for(int i = 0; i <= numberOfSamplingPoints; ++i) t[i] = -0.5 * PI + i * dt;
 
             Point2D[] pts = new Point2D[numberOfSamplingPoints + 1];
-            for(int i = 0; i <= numberOfSamplingPoints; ++i)
-                pts[i] = new Point2D.Double(leftMargin + radius*(1d + (FastMath.tan(FastMath.atan(1d/FastMath.cos(t[i]))*0.5d)*FastMath.cos(t[i]))) ,
-                    bottomMargin + radius*(1d + (FastMath.tan(FastMath.atan(1d/FastMath.cos(t[i]))*0.5d)*FastMath.sin(t[i]))) );
+            for (int i = 0; i <= numberOfSamplingPoints; ++i) {
+                pts[i] = new Point2D.Double(leftMargin + radius * (1 + (tan(atan(1 / cos(t[i])) * 0.5) * cos(t[i]))),
+                    bottomMargin + radius * (1 + (tan(atan(1 / cos(t[i])) * 0.5) * sin(t[i]))));
+            }
             drawCurve(g2d, pts);
-
 
             pts = new Point2D[numberOfSamplingPoints + 1];
-            for(int i = 0; i <= numberOfSamplingPoints; ++i)
-                pts[i] = new Point2D.Double(leftMargin + radius*(1d - (FastMath.tan(FastMath.atan(1d/FastMath.cos(t[i]))*0.5d)*FastMath.cos(t[i]))) ,
-                    bottomMargin + radius*(1d + (FastMath.tan(FastMath.atan(1d/FastMath.cos(t[i]))*0.5d)*FastMath.sin(t[i]))) );
+            for (int i = 0; i <= numberOfSamplingPoints; ++i) {
+                pts[i] = new Point2D.Double(leftMargin + radius * (1 - (tan(atan(1 / cos(t[i])) * 0.5) * cos(t[i]))),
+                    bottomMargin + radius * (1 + (tan(atan(1 / cos(t[i])) * 0.5) * sin(t[i]))));
+            }
             drawCurve(g2d, pts);
-
 
             pts = new Point2D[numberOfSamplingPoints + 1];
-            for(int i = 0; i <= numberOfSamplingPoints; ++i)
-                pts[i] = new Point2D.Double(leftMargin + radius*(1d + (FastMath.tan(FastMath.atan(1d/FastMath.cos(t[i]))*0.5d)*FastMath.sin(t[i]))) ,
-                    bottomMargin + radius*(1d + (FastMath.tan(FastMath.atan(1d/FastMath.cos(t[i]))*0.5d)*FastMath.cos(t[i]))) );
+            for (int i = 0; i <= numberOfSamplingPoints; ++i) {
+                pts[i] = new Point2D.Double(leftMargin + radius * (1 + (tan(atan(1 / cos(t[i])) * 0.5) * sin(t[i]))),
+                    bottomMargin + radius * (1 + (tan(atan(1 / cos(t[i])) * 0.5) * cos(t[i]))));
+            }
             drawCurve(g2d, pts);
-
 
             pts = new Point2D[numberOfSamplingPoints + 1];
-            for(int i = 0; i <= numberOfSamplingPoints; ++i)
-                pts[i] = new Point2D.Double(leftMargin + radius*(1d + (FastMath.tan(FastMath.atan(1d/FastMath.cos(t[i]))*0.5d)*FastMath.sin(t[i]))) ,
-                    bottomMargin + radius*(1d - (FastMath.tan(FastMath.atan(1d/FastMath.cos(t[i]))*0.5d)*FastMath.cos(t[i]))) );
+            for (int i = 0; i <= numberOfSamplingPoints; ++i) {
+                pts[i] = new Point2D.Double(leftMargin + radius * (1 + (tan(atan(1 / cos(t[i])) * 0.5) * sin(t[i]))),
+                    bottomMargin + radius * (1 - (tan(atan(1 / cos(t[i])) * 0.5) * cos(t[i]))));
+            }
             drawCurve(g2d, pts);
-
         });
         return this;
     }

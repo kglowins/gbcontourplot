@@ -9,6 +9,6 @@ import java.util.List;
 @Value
 @AllArgsConstructor
 public class ColoredPolygon {
-    private List<Coordinates2D> polygon;
-    private Color color;
+    List<Coordinates2D> polygon;
+    Color color;
 }

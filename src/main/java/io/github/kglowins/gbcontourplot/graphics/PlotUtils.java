@@ -1,9 +1,8 @@
 package io.github.kglowins.gbcontourplot.graphics;
 
 import io.github.kglowins.gbcontourplot.colormappers.ColorMapper;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.math3.util.FastMath;
 
+import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.geom.Path2D;
@@ -11,7 +10,14 @@ import java.awt.geom.Point2D;
 import java.util.List;
 import java.util.function.BiFunction;
 
-@Slf4j
+import static java.awt.BasicStroke.CAP_BUTT;
+import static java.awt.BasicStroke.JOIN_MITER;
+import static java.lang.Math.PI;
+import static java.lang.Math.atan;
+import static java.lang.Math.atan2;
+import static java.lang.Math.cos;
+import static java.lang.Math.tan;
+
 public class PlotUtils {
 
     private PlotUtils() {
@@ -19,7 +25,6 @@ public class PlotUtils {
 
     public static Color getIsoBandColor(ColorMapper colorMapper, List<Double> scaledLevels, Integer index) {
         double middle = 0.5 * (scaledLevels.get(index) + scaledLevels.get(index + 1));
-        log.debug("{} {}", middle, (1 - middle) * scaledLevels.get(index) + middle * scaledLevels.get(index + 1) );
         return colorMapper.map(middle);
         //TODO consider
         // return colorMapper.map(
@@ -32,14 +37,16 @@ public class PlotUtils {
 
     public static BiFunction<Double, Double, Boolean> insideCubicSST() {
         return (x, y) -> {
-            double cosOfAtan = FastMath.cos(FastMath.atan2(y, x));
-            return x <= cosOfAtan * FastMath.tan(0.5 * FastMath.atan(1 / cosOfAtan))
+            double cosOfAtan = cos(atan2(y, x));
+            return x <= cosOfAtan * tan(0.5 * atan(1 / cosOfAtan))
                 && y > 0 && y <= x;
         };
     }
 
     public static BiFunction<Double, Double, Boolean> insideHexagonalSST() {
-        return (x, y) -> true;
+        return (x, y) -> x * x + y * y <= 1
+            && y > 0
+            && y < x * cos(PI / 6);
     }
 
     //TODO copied from gbtoolbox-legacy
@@ -67,5 +74,9 @@ public class PlotUtils {
             }
             g2d.draw(curve);
         }
+    }
+
+    public static BasicStroke getDashedStroke(float thickness) {
+        return new BasicStroke(thickness, CAP_BUTT, JOIN_MITER, 12.5f, new float[]{5.0f, 7.5f}, 0.0f);
     }
 }

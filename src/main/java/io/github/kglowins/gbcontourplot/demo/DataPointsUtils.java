@@ -22,6 +22,8 @@ import static java.util.stream.Collectors.toList;
 @Slf4j
 class DataPointsUtils {
 
+    private static final String WHITESPACE = "\\s+";
+
     private DataPointsUtils() {
     }
 
@@ -30,7 +32,7 @@ class DataPointsUtils {
             var resourcePathAndFs = getResourcePathAndFs(resource);
             List<Function2DValue> dataPoints = Files.lines(resourcePathAndFs.getPath())
                 .map(line -> {
-                    String[] words = line.trim().split("\\s+");
+                    String[] words = line.trim().split(WHITESPACE);
                     double x = Double.parseDouble(words[0]);
                     double y = Double.parseDouble(words[1]);
                     double f = Double.parseDouble(words[4]);

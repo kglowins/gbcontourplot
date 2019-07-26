@@ -4,7 +4,6 @@ import io.github.kglowins.gbcontourplot.colormappers.ColorMapper;
 import io.github.kglowins.gbcontourplot.grid.Grid2DValues;
 import lombok.Setter;
 import lombok.experimental.Accessors;
-import lombok.extern.slf4j.Slf4j;
 import net.sf.javaml.core.Pair;
 
 import java.awt.BasicStroke;
@@ -29,7 +28,6 @@ import static java.util.stream.IntStream.rangeClosed;
 
 @Accessors(chain = true, fluent = true)
 @Setter
-@Slf4j
 public class ColorBarBuilder {
 
     // required
@@ -74,17 +72,14 @@ public class ColorBarBuilder {
         checkIfRequiredParamsProvided();
 
         return g2d -> {
-
             if (nonNull(font)) {
                 g2d.setFont(font);
             }
-
 
             Pair<List<Double>, List<Double>> barLevelsWithColorLevels = continuous
                 ? scaleBarLevels(getContinuousIsoLevels(grid2DValues.getFMin(),
                     grid2DValues.getFMax()), grid2DValues.getFMin(), grid2DValues.getFMax(), rangeMin, rangeMax)
                 : scaleBarLevels(isoLevels, grid2DValues.getFMin(), grid2DValues.getFMax(), rangeMin, rangeMax);
-            log.debug("ColorBarBuilder.barLevels = {}", barLevelsWithColorLevels);
 
             List<Double> barLevels = barLevelsWithColorLevels.x();
             List<Double> barColorLevels = barLevelsWithColorLevels.y();
@@ -92,8 +87,6 @@ public class ColorBarBuilder {
             List<Double> scaledLabelLevels = nonNull(labelLevels)
                 ? scaleLabelLevels(labelLevels, grid2DValues.getFMin(), grid2DValues.getFMax())
                 : scaleLabelLevels(isoLevels, grid2DValues.getFMin(), grid2DValues.getFMax());
-
-            log.debug("ColorBarBuilder.labelLevels = {}", labelLevels);
 
             if (colorBarLocation == RIGHT) {
                 range(0, barLevels.size() - 1)

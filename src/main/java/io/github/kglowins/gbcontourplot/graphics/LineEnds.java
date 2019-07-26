@@ -6,8 +6,8 @@ import lombok.experimental.Accessors;
 @Value(staticConstructor = "of")
 @Accessors(fluent = true)
 public class LineEnds {
-    private double x1;
-    private double y1;
-    private double x2;
-    private double y2;
+    double x1;
+    double y1;
+    double x2;
+    double y2;
 }

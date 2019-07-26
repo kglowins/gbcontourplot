@@ -19,7 +19,7 @@ import java.util.List;
 
 import static io.github.kglowins.gbcontourplot.colorbar.ColorBarLocation.BOTTOM;
 import static io.github.kglowins.gbcontourplot.demo.DataPointsUtils.readDataPoints;
-import static io.github.kglowins.gbcontourplot.graphics.PlotUtils.insideCircle;
+import static io.github.kglowins.gbcontourplot.graphics.PlotUtils.insideHexagonalSST;
 import static io.github.kglowins.gbcontourplot.graphics.RegionCropStyle.EXCLUSIVE;
 import static io.github.kglowins.gbcontourplot.graphics.RegionCropStyle.INCLUSIVE;
 import static java.awt.Color.DARK_GRAY;
@@ -60,8 +60,8 @@ public class TiGbpdDemo {
             .setContourWidth(300)
             .setContourHeight(300)
             .setBackgroundAndClear(WHITE)
-            .addIsoBands(isoBands, insideCircle(1), INCLUSIVE)
-            .addIsoLines(isoLines, DARK_GRAY, new BasicStroke(0.5f), insideCircle(1), EXCLUSIVE)
+            .addIsoBands(isoBands, insideHexagonalSST(), INCLUSIVE)
+            .addIsoLines(isoLines, DARK_GRAY, new BasicStroke(0.5f), insideHexagonalSST(), EXCLUSIVE)
             .addCircularMarginSST()
             .cropHexagonalSST()
             .addHexagonalSST();

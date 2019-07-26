@@ -1,13 +1,9 @@
 package io.github.kglowins.gbcontourplot.colormappers;
 
-
-import lombok.extern.slf4j.Slf4j;
-
 import java.awt.Color;
 
 import static java.util.stream.IntStream.range;
 
-@Slf4j
 public class TableBasedColorMapper implements ColorMapper {
 
     private double[][] rgbValues;

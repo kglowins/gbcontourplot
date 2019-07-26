@@ -1,6 +1,7 @@
 package io.github.kglowins.gbcontourplot;
 
 import io.github.kglowins.gbcontourplot.demo.In100GbcdDemo;
+import io.github.kglowins.gbcontourplot.demo.CharacteristicGBsDemo;
 import io.github.kglowins.gbcontourplot.demo.TiGbcdDemo;
 import io.github.kglowins.gbcontourplot.demo.TiGbpdDemo;
 import io.github.kglowins.gbcontourplot.demo.ZrO2Demo;
@@ -23,19 +24,21 @@ public class Demo {
     private static final String TI_GBCD = "Ti GBCD";
     private static final String TI_GBPD = "Ti GBPD";
     private static final String IN100_GBCD = "IN100 GBCD";
+    private static final String CHARACTERISTIC = "Characteristic GBs";
 
     public static void main(String[] args) {
 
-        log.debug("Avalable fonts = {}", asList(GraphicsEnvironment.getLocalGraphicsEnvironment().getAvailableFontFamilyNames()));
+        log.debug("Available fonts = {}", asList(GraphicsEnvironment.getLocalGraphicsEnvironment().getAvailableFontFamilyNames()));
 
         JPanel cards = new JPanel(new CardLayout());
         cards.add(ZrO2Demo.createPlots(), ZRO2);
         cards.add(TiGbcdDemo.createPlots(), TI_GBCD);
         cards.add(TiGbpdDemo.createPlots(), TI_GBPD);
         cards.add(In100GbcdDemo.createPlots(), IN100_GBCD);
+        cards.add(CharacteristicGBsDemo.createPlot(), CHARACTERISTIC);
 
         JPanel comboBoxPanel = new JPanel();
-        String[] comboBoxItems = new String[]{ZRO2, TI_GBCD, TI_GBPD, IN100_GBCD};
+        String[] comboBoxItems = new String[]{ZRO2, TI_GBCD, TI_GBPD, IN100_GBCD, CHARACTERISTIC};
         JComboBox<String> comboBox = new JComboBox<>(comboBoxItems);
         comboBox.setEditable(false);
         comboBox.addItemListener(itemEvent -> {
