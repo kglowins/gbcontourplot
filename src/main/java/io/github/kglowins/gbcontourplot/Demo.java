@@ -1,5 +1,6 @@
 package io.github.kglowins.gbcontourplot;
 
+import io.github.kglowins.gbcontourplot.demo.GbcdSymmetriesDemo;
 import io.github.kglowins.gbcontourplot.demo.In100GbcdDemo;
 import io.github.kglowins.gbcontourplot.demo.CharacteristicGBsDemo;
 import io.github.kglowins.gbcontourplot.demo.TiGbcdDemo;
@@ -25,6 +26,7 @@ public class Demo {
     private static final String TI_GBPD = "Ti GBPD";
     private static final String IN100_GBCD = "IN100 GBCD";
     private static final String CHARACTERISTIC = "Characteristic GBs";
+    private static final String SYMMETRIES = "GBCD Symmetries";
 
     public static void main(String[] args) {
 
@@ -36,9 +38,10 @@ public class Demo {
         cards.add(TiGbpdDemo.createPlots(), TI_GBPD);
         cards.add(In100GbcdDemo.createPlots(), IN100_GBCD);
         cards.add(CharacteristicGBsDemo.createPlot(), CHARACTERISTIC);
+        cards.add(GbcdSymmetriesDemo.createPlot(), SYMMETRIES);
 
         JPanel comboBoxPanel = new JPanel();
-        String[] comboBoxItems = new String[]{ZRO2, TI_GBCD, TI_GBPD, IN100_GBCD, CHARACTERISTIC};
+        String[] comboBoxItems = new String[]{ZRO2, TI_GBCD, TI_GBPD, IN100_GBCD, CHARACTERISTIC, SYMMETRIES};
         JComboBox<String> comboBox = new JComboBox<>(comboBoxItems);
         comboBox.setEditable(false);
         comboBox.addItemListener(itemEvent -> {

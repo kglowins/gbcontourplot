@@ -6,12 +6,15 @@ import de.erichseifert.vectorgraphics2d.Processors;
 import de.erichseifert.vectorgraphics2d.VectorGraphics2D;
 import de.erichseifert.vectorgraphics2d.intermediate.CommandSequence;
 import de.erichseifert.vectorgraphics2d.util.PageSize;
+import io.github.kglowins.gbparameters.gbcd.SymmetryAxis;
 import io.github.kglowins.gbcontourplot.graphics.ColoredPolygon;
 import io.github.kglowins.gbcontourplot.graphics.Coordinates2D;
 import io.github.kglowins.gbcontourplot.graphics.LineEnds;
 import io.github.kglowins.gbcontourplot.graphics.RegionCropStyle;
+import io.github.kglowins.gbparameters.utils.SaferMath;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.math3.util.FastMath;
 
 import javax.imageio.ImageIO;
 import javax.swing.JPanel;
@@ -299,7 +302,7 @@ public class ContourPlot extends JPanel {
             int lineWidth = 32;
             g2d.setStroke(new BasicStroke((float) 2 * lineWidth));
             g2d.drawOval(leftMargin - lineWidth, bottomMargin - lineWidth,
-                contourWidth + 2 * lineWidth, contourHeight + 2 * lineWidth);
+                    contourWidth + 2 * lineWidth, contourHeight + 2 * lineWidth);
         });
         return this;
     }
@@ -514,6 +517,216 @@ public class ContourPlot extends JPanel {
                     bottomMargin + radius * (1 - (tan(atan(1 / cos(t[i])) * 0.5) * cos(t[i]))));
             }
             drawCurve(g2d, pts);
+        });
+        return this;
+    }
+
+    public ContourPlot addSpots(List<Point2D> coordinates, Color color, int size) {
+        plotElements.add(g2d -> {
+            g2d.setColor(color);
+            for (Point2D coords : coordinates) {
+                g2d.fillOval(
+                        leftMargin + (int)(0.5 * contourWidth * (1. + coords.getX()) ) - size / 2,
+                        bottomMargin + (int)(0.5 * contourHeight * (1. + coords.getY())) - size / 2,
+                        size, size);
+            }
+        });
+        return this;
+    }
+
+    public ContourPlot addSpots(List<Point2D> coordinates, Color color, int size, Stroke stroke) {
+        plotElements.add(g2d -> {
+            g2d.setColor(color);
+            g2d.setStroke(stroke);
+            for (Point2D coords : coordinates) {
+                g2d.drawOval(
+                        leftMargin + (int)(0.5 * contourWidth * (1. + coords.getX()) ) - size / 2,
+                        bottomMargin + (int)(0.5 * contourHeight * (1. + coords.getY())) - size / 2,
+                        size, size);
+            }
+        });
+        return this;
+    }
+
+    public ContourPlot addZones(List<List<Point2D>> zones, Color color, Stroke stroke) {
+        plotElements.add(g2d -> {
+            g2d.setColor(color);
+            g2d.setStroke(stroke);
+            for (List<Point2D> zone : zones) {
+                drawCurve(g2d, zone.stream().map(p -> new Point2D.Double(
+                        leftMargin + (int)(0.5 * contourWidth * (1. + p.getX())),
+                        bottomMargin + (int)(0.5 * contourHeight * (1. + p.getY()))
+                )).toArray(Point2D[]::new));
+            }
+        });
+        return this;
+    }
+
+    public ContourPlot addSymmetryAxes(List<SymmetryAxis> symmetryAxes, int size, Color color) {
+        final double EPSILON = 0.01;
+        plotElements.add(g2d -> {
+            for (SymmetryAxis axis1 : symmetryAxes) {
+                double theta = FastMath.atan2(axis1.getAxis().y(), axis1.getAxis().x());
+                double phi = SaferMath.acos(axis1.getAxis().z());
+                double r = FastMath.tan(0.5 * phi);
+                int rX = leftMargin + (int)(0.5 * contourWidth * (1. + r * FastMath.cos(theta)));
+                int rY = bottomMargin + (int)(0.5 * contourHeight * (1. + r * FastMath.sin(theta)));
+
+                g2d.setColor(color);
+                if (axis1.getMultiplicity() == 2) {
+                    boolean isOverlap = false;
+                    for (SymmetryAxis axis2 : symmetryAxes)
+                        if (Math.abs(axis2.getAxis().dot(axis1.getAxis()) - 1.) < EPSILON
+                                && axis2.getMultiplicity() > axis1.getMultiplicity()) {
+                            isOverlap = true;
+                            break;
+                        }
+                    if (!isOverlap) {
+                        g2d.fillOval(rX - size / 4, rY - size / 2, size / 2, size);
+                    }
+
+                } else if(axis1.getMultiplicity() == 3) {
+                    boolean isOverlap = false;
+                    for (SymmetryAxis axis2 : symmetryAxes)
+                        if (Math.abs(axis2.getAxis().dot(axis1.getAxis()) - 1.) < EPSILON
+                                && axis2.getMultiplicity() > axis1.getMultiplicity()) {
+                            isOverlap = true;
+                            break;
+                        }
+                    double radius = 0.625 * size;
+                    if (!isOverlap) {
+                        g2d.fillPolygon(
+                                new int[]{rX - (int)(radius * cos(PI / 2. + PI / 3.)),
+                                        rX - (int)(radius * cos(PI / 2. + PI )),
+                                        rX - (int)(radius * cos(PI / 2. + 5.* PI / 3.))
+
+                                },
+                                new int[]{rY - (int)(radius * sin(PI / 2. + PI / 3.)),
+                                        rY - (int)(radius * sin(PI / 2. + PI)),
+                                        rY - (int)(radius * sin(PI / 2. + 5.* PI / 3.))},
+                                3);
+                    }
+
+                } else if(axis1.getMultiplicity() == 4) {
+                    boolean isOverlap = false;
+                    for (SymmetryAxis axis2 : symmetryAxes)
+                        if (Math.abs(axis2.getAxis().dot(axis1.getAxis()) - 1.) < EPSILON
+                                && axis2.getMultiplicity() > axis1.getMultiplicity()) {
+                            isOverlap = true;
+                            break;
+                        }
+                    if (!isOverlap) {
+                        g2d.fillRect(rX - (int)(11./32.*size), rY - - (int)(11./32.*size), (int)(22./32.*size), (int)(22./32.*size));
+                    }
+
+                } else if(axis1.getMultiplicity() == 6) {
+                    double rad = 24./32.*size;
+                    boolean isOverlap = false;
+                    for (SymmetryAxis elem2 : symmetryAxes)
+                        if(Math.abs(elem2.getAxis().dot(axis1.getAxis()) - 1.) < 0.01
+                                && elem2.getMultiplicity() > axis1.getMultiplicity()) {
+                            isOverlap = true;
+                            break;
+                        }
+                    if (!isOverlap)
+                        g2d.fillPolygon(
+                                new int[]{rX - (int)(rad* cos(0.)),
+                                        rX - (int)(rad* cos(PI / 3.)),
+                                        rX - (int)(rad* cos(PI * 2. / 3.)),
+                                        rX - (int)(rad* cos(PI )),
+                                        rX - (int)(rad* cos(PI * 4. / 3.)),
+                                        rX - (int)(rad* cos(PI * 5. / 3.)),
+                                },
+                                new int[]{rY - (int)(rad * sin(0.)),
+                                        rY - (int)(rad* sin(PI / 3.)),
+                                        rY - (int)(rad* sin(PI * 2. / 3.)),
+                                        rY - (int)(rad* sin(PI )),
+                                        rY - (int)(rad* sin(PI * 4. / 3.)),
+                                        rY - (int)(rad* sin(PI * 5. / 3.))},
+                                6);
+
+                } else if(axis1.getMultiplicity() == 8) {
+                    double rad = 25./32.*size;
+                    boolean isOverlap = false;
+                    for(SymmetryAxis axis2 : symmetryAxes)
+                        if(Math.abs(axis2.getAxis().dot(axis1.getAxis()) - 1d) < EPSILON
+                                && axis2.getMultiplicity() > axis1.getMultiplicity()) {
+                            isOverlap = true;
+                            break;
+                        }
+                    if (!isOverlap)
+                        g2d.fillPolygon(
+                                new int[]{(int)(rX - rad* cos(0d)),
+                                        (int)(rX - rad* cos(PI / 4d)),
+                                        (int)(rX - rad* cos(PI / 4d * 2d)),
+                                        (int)(rX - rad* cos(PI / 4d * 3d)),
+                                        (int)(rX - rad* cos(PI / 4d * 4d)),
+                                        (int)(rX - rad* cos(PI / 4d * 5d)),
+                                        (int)(rX - rad* cos(PI / 4d * 6d)),
+                                        (int)(rX - rad* cos(PI / 4d * 7d))
+
+                                },
+                                new int[]{(int)(rY - rad* sin(0d)),
+                                        (int)(rY - rad* sin(PI / 4d )),
+                                        (int)(rY - rad* sin(PI / 4d * 2d)),
+                                        (int)(rY - rad* sin(PI / 4d * 3d)),
+                                        (int)(rY - rad* sin(PI / 4d * 4d)),
+                                        (int)(rY - rad* sin(PI / 4d * 5d)),
+                                        (int)(rY - rad* sin(PI / 4d * 6d)),
+                                        (int)(rY - rad* sin(PI / 4d * 7d)),
+                                }, 8);
+
+
+                } else if(axis1.getMultiplicity() == 12) {
+
+                    boolean isOverlap = false;
+                    for (SymmetryAxis axis2 : symmetryAxes)
+                        if (Math.abs(axis2.getAxis().dot(axis1.getAxis()) - 1d) < EPSILON
+                                && axis2.getMultiplicity() > axis1.getMultiplicity()) {
+                            isOverlap = true;
+                            break;
+                        }
+
+                    double rad = 42./32.*size;
+                    if (!isOverlap)
+                        g2d.fillPolygon(
+                                new int[]{(int)(rX - rad* cos(0d)),
+                                        (int)(rX - rad* cos(PI / 6d)),
+                                        (int)(rX - rad* cos(PI * 2d / 6d)),
+                                        (int)(rX - rad* cos(PI * 3d / 6d)),
+                                        (int)(rX - rad* cos(PI * 4d / 6d)),
+                                        (int)(rX - rad* cos(PI * 5d / 6d)),
+                                        (int)(rX - rad* cos(PI )),
+                                        (int)(rX - rad* cos(PI * 7d / 6d)),
+                                        (int)(rX - rad* cos(PI * 8d / 6d)),
+                                        (int)(rX - rad* cos(PI * 9d / 6d)),
+                                        (int)(rX - rad* cos(PI * 10d / 6d)),
+                                        (int)(rX - rad* cos(PI * 11d / 6d)),
+                                },
+                                new int[]{(int)(rY - rad* sin(0.)),
+                                        (int)(rY - rad* sin(PI / 6.)),
+                                        (int)(rY - rad* sin(PI * 2. / 6.)),
+                                        (int)(rY - rad* sin(PI * 3. / 6.)),
+                                        (int)(rY - rad* sin(PI * 4. / 6.)),
+                                        (int)(rY - rad* sin(PI * 5. / 6.)),
+                                        (int)(rY - rad* sin(PI )),
+                                        (int)(rY - rad* sin(PI * 7. / 6.)),
+                                        (int)(rY - rad* sin(PI * 8. / 6.)),
+                                        (int)(rY - rad* sin(PI * 9. / 6.)),
+                                        (int)(rY - rad* sin(PI * 10. / 6.)),
+                                        (int)(rY - rad* sin(PI * 11. / 6.))
+                                }, 12);
+
+
+                } else {
+                    log.warn("Unsupported {}-fold symmetry axis won't be displayed", axis1.getMultiplicity());
+                }
+            }
+
+            g2d.setColor(color);
+            g2d.fillOval(leftMargin + contourWidth / 2 - size / 4, bottomMargin + contourHeight / 2 - size / 4, size / 2, size / 2);
+            g2d.setColor(Color.white);
+            g2d.fillOval(leftMargin + contourWidth / 2 - size / 4 + 3, bottomMargin + contourHeight / 2 - size / 4 + 3, size / 2 - 6, size / 2 - 6);
         });
         return this;
     }
