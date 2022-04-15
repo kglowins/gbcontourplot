@@ -1,12 +1,12 @@
 package io.github.kglowins.gbcontourplot.demo;
 
-import io.github.kglowins.gbparameters.gbcd.GbcdSymmetries;
-import io.github.kglowins.gbparameters.gbcd.GbcdSymmetriesFinder;
+import io.github.kglowins.gbparams.gbcd.GbcdSymmetries;
+import io.github.kglowins.gbparams.gbcd.GbcdSymmetriesFinder;
 import io.github.kglowins.gbcontourplot.ContourPlot;
-import io.github.kglowins.gbparameters.enums.PointGroup;
-import io.github.kglowins.gbparameters.representation.AxisAngle;
-import io.github.kglowins.gbparameters.representation.Matrix3x3;
-import io.github.kglowins.gbparameters.representation.UnitVector;
+import io.github.kglowins.gbparams.enums.PointGroup;
+import io.github.kglowins.gbparams.representation.AxisAngle;
+import io.github.kglowins.gbparams.representation.Matrix3x3;
+import io.github.kglowins.gbparams.representation.UnitVector;
 
 import java.awt.*;
 

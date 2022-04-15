@@ -1,19 +1,13 @@
 package io.github.kglowins.gbcontourplot;
 
-import de.erichseifert.vectorgraphics2d.Document;
-import de.erichseifert.vectorgraphics2d.Processor;
-import de.erichseifert.vectorgraphics2d.Processors;
-import de.erichseifert.vectorgraphics2d.VectorGraphics2D;
-import de.erichseifert.vectorgraphics2d.intermediate.CommandSequence;
-import de.erichseifert.vectorgraphics2d.util.PageSize;
-import io.github.kglowins.gbparameters.gbcd.SymmetryAxis;
+import io.github.kglowins.gbparams.gbcd.SymmetryAxis;
 import io.github.kglowins.gbcontourplot.graphics.ColoredPolygon;
 import io.github.kglowins.gbcontourplot.graphics.Coordinates2D;
 import io.github.kglowins.gbcontourplot.graphics.LineEnds;
 import io.github.kglowins.gbcontourplot.graphics.RegionCropStyle;
-import io.github.kglowins.gbparameters.utils.SaferMath;
-import lombok.Getter;
-import lombok.extern.slf4j.Slf4j;
+import io.github.kglowins.gbparams.utils.SaferMath;
+import net.sf.epsgraphics.ColorMode;
+import net.sf.epsgraphics.EpsGraphics;
 import org.apache.commons.math3.util.FastMath;
 
 import javax.imageio.ImageIO;
@@ -38,6 +32,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import static io.github.kglowins.gbcontourplot.graphics.PlotUtils.drawCurve;
 import static java.lang.Math.PI;
@@ -50,26 +46,20 @@ import static java.lang.Math.tan;
 import static java.util.Objects.nonNull;
 import static java.util.stream.IntStream.rangeClosed;
 
-@Slf4j
 public class ContourPlot extends JPanel {
+    private static final Logger log = LoggerFactory.getLogger(ContourPlot.class);
 
-    @Getter
     private int topMargin = 0;
-    @Getter
     private int bottomMargin = 0;
-    @Getter
     private int leftMargin = 0;
-    @Getter
     private int rightMargin = 0;
-    @Getter
     private int contourWidth = 600;
-    @Getter
     private int contourHeight = 600;
 
-    private double contourMinX;
-    private double contourMaxX;
-    private double contourMinY;
-    private double contourMaxY;
+    private final double contourMinX;
+    private final double contourMaxX;
+    private final double contourMinY;
+    private final double contourMaxY;
 
     private List<Consumer<Graphics2D>> plotElements;
 
@@ -153,18 +143,20 @@ public class ContourPlot extends JPanel {
         return tx;
     }
 
-    public void toVectorFile(String format, PageSize pageSize, String path) {
-        Graphics2D vg2d = new VectorGraphics2D();
-        vg2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-        vg2d.setTransform(getBaseTransform());
-        plotElements.forEach(e -> e.accept(vg2d));
-        CommandSequence commands = ((VectorGraphics2D) vg2d).getCommands();
-        Processor processor = Processors.get(format);
-        Document document = processor.getDocument(commands, pageSize);
+    public void toEps(String path) {
         try {
-            document.writeTo(new FileOutputStream(path));
+            EpsGraphics g = new EpsGraphics("ContourPlot.toEps",
+                    new FileOutputStream(path),
+                    0, 0,
+                    leftMargin + contourWidth + rightMargin,
+                    bottomMargin + contourHeight + topMargin,
+                    ColorMode.COLOR_RGB);
+            g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+            g.setTransform(getBaseTransform());
+            plotElements.forEach(e -> e.accept(g));
+            g.close();
         } catch (IOException e) {
-            log.error("Failed to export ContourPlot to {}", format, e);
+            log.error("Failed to export ContourPlot to EPS", e);
         }
     }
 
@@ -563,36 +555,23 @@ public class ContourPlot extends JPanel {
     }
 
     public ContourPlot addSymmetryAxes(List<SymmetryAxis> symmetryAxes, int size, Color color) {
-        final double EPSILON = 0.01;
         plotElements.add(g2d -> {
-            for (SymmetryAxis axis1 : symmetryAxes) {
-                double theta = FastMath.atan2(axis1.getAxis().y(), axis1.getAxis().x());
-                double phi = SaferMath.acos(axis1.getAxis().z());
+            for (SymmetryAxis symmetryAxis : symmetryAxes) {
+                double theta = FastMath.atan2(symmetryAxis.getAxis().y(), symmetryAxis.getAxis().x());
+                double phi = SaferMath.acos(symmetryAxis.getAxis().z());
                 double r = FastMath.tan(0.5 * phi);
                 int rX = leftMargin + (int)(0.5 * contourWidth * (1. + r * FastMath.cos(theta)));
                 int rY = bottomMargin + (int)(0.5 * contourHeight * (1. + r * FastMath.sin(theta)));
 
                 g2d.setColor(color);
-                if (axis1.getMultiplicity() == 2) {
-                    boolean isOverlap = false;
-                    for (SymmetryAxis axis2 : symmetryAxes)
-                        if (Math.abs(axis2.getAxis().dot(axis1.getAxis()) - 1.) < EPSILON
-                                && axis2.getMultiplicity() > axis1.getMultiplicity()) {
-                            isOverlap = true;
-                            break;
-                        }
+                if (symmetryAxis.getMultiplicity() == 2) {
+                    boolean isOverlap = isOverlap(symmetryAxes, symmetryAxis);
                     if (!isOverlap) {
                         g2d.fillOval(rX - size / 4, rY - size / 2, size / 2, size);
                     }
 
-                } else if(axis1.getMultiplicity() == 3) {
-                    boolean isOverlap = false;
-                    for (SymmetryAxis axis2 : symmetryAxes)
-                        if (Math.abs(axis2.getAxis().dot(axis1.getAxis()) - 1.) < EPSILON
-                                && axis2.getMultiplicity() > axis1.getMultiplicity()) {
-                            isOverlap = true;
-                            break;
-                        }
+                } else if(symmetryAxis.getMultiplicity() == 3) {
+                    boolean isOverlap = isOverlap(symmetryAxes, symmetryAxis);
                     double radius = 0.625 * size;
                     if (!isOverlap) {
                         g2d.fillPolygon(
@@ -607,27 +586,15 @@ public class ContourPlot extends JPanel {
                                 3);
                     }
 
-                } else if(axis1.getMultiplicity() == 4) {
-                    boolean isOverlap = false;
-                    for (SymmetryAxis axis2 : symmetryAxes)
-                        if (Math.abs(axis2.getAxis().dot(axis1.getAxis()) - 1.) < EPSILON
-                                && axis2.getMultiplicity() > axis1.getMultiplicity()) {
-                            isOverlap = true;
-                            break;
-                        }
+                } else if(symmetryAxis.getMultiplicity() == 4) {
+                    boolean isOverlap = isOverlap(symmetryAxes, symmetryAxis);
                     if (!isOverlap) {
                         g2d.fillRect(rX - (int)(11./32.*size), rY - - (int)(11./32.*size), (int)(22./32.*size), (int)(22./32.*size));
                     }
 
-                } else if(axis1.getMultiplicity() == 6) {
+                } else if(symmetryAxis.getMultiplicity() == 6) {
                     double rad = 24./32.*size;
-                    boolean isOverlap = false;
-                    for (SymmetryAxis elem2 : symmetryAxes)
-                        if(Math.abs(elem2.getAxis().dot(axis1.getAxis()) - 1.) < 0.01
-                                && elem2.getMultiplicity() > axis1.getMultiplicity()) {
-                            isOverlap = true;
-                            break;
-                        }
+                    boolean isOverlap = isOverlap(symmetryAxes, symmetryAxis);
                     if (!isOverlap)
                         g2d.fillPolygon(
                                 new int[]{rX - (int)(rad* cos(0.)),
@@ -645,15 +612,9 @@ public class ContourPlot extends JPanel {
                                         rY - (int)(rad* sin(PI * 5. / 3.))},
                                 6);
 
-                } else if(axis1.getMultiplicity() == 8) {
+                } else if(symmetryAxis.getMultiplicity() == 8) {
                     double rad = 25./32.*size;
-                    boolean isOverlap = false;
-                    for(SymmetryAxis axis2 : symmetryAxes)
-                        if(Math.abs(axis2.getAxis().dot(axis1.getAxis()) - 1d) < EPSILON
-                                && axis2.getMultiplicity() > axis1.getMultiplicity()) {
-                            isOverlap = true;
-                            break;
-                        }
+                    boolean isOverlap = isOverlap(symmetryAxes, symmetryAxis);
                     if (!isOverlap)
                         g2d.fillPolygon(
                                 new int[]{(int)(rX - rad* cos(0d)),
@@ -676,18 +637,9 @@ public class ContourPlot extends JPanel {
                                         (int)(rY - rad* sin(PI / 4d * 7d)),
                                 }, 8);
 
-
-                } else if(axis1.getMultiplicity() == 12) {
-
-                    boolean isOverlap = false;
-                    for (SymmetryAxis axis2 : symmetryAxes)
-                        if (Math.abs(axis2.getAxis().dot(axis1.getAxis()) - 1d) < EPSILON
-                                && axis2.getMultiplicity() > axis1.getMultiplicity()) {
-                            isOverlap = true;
-                            break;
-                        }
-
+                } else if(symmetryAxis.getMultiplicity() == 12) {
                     double rad = 42./32.*size;
+                    boolean isOverlap = isOverlap(symmetryAxes, symmetryAxis);
                     if (!isOverlap)
                         g2d.fillPolygon(
                                 new int[]{(int)(rX - rad* cos(0d)),
@@ -719,7 +671,7 @@ public class ContourPlot extends JPanel {
 
 
                 } else {
-                    log.warn("Unsupported {}-fold symmetry axis won't be displayed", axis1.getMultiplicity());
+                    log.warn("Unsupported {}-fold symmetry axis won't be displayed", symmetryAxis.getMultiplicity());
                 }
             }
 
@@ -729,5 +681,15 @@ public class ContourPlot extends JPanel {
             g2d.fillOval(leftMargin + contourWidth / 2 - size / 4 + 3, bottomMargin + contourHeight / 2 - size / 4 + 3, size / 2 - 6, size / 2 - 6);
         });
         return this;
+    }
+
+    private boolean isOverlap(List<SymmetryAxis> symmetryAxes, SymmetryAxis axis1) {
+        final double EPSILON = 0.01;
+        for (SymmetryAxis axis2 : symmetryAxes)
+            if (Math.abs(axis2.getAxis().dot(axis1.getAxis()) - 1.) < EPSILON
+                    && axis2.getMultiplicity() > axis1.getMultiplicity()) {
+                return true;
+            }
+        return false;
     }
 }

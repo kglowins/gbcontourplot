@@ -3,9 +3,6 @@ package io.github.kglowins.gbcontourplot.grid;
 import io.github.kglowins.gbcontourplot.graphics.ColoredPolygon;
 import io.github.kglowins.gbcontourplot.graphics.LineEnds;
 import io.github.kglowins.gbcontourplot.colormappers.ColorMapper;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 
 import java.awt.Color;
 import java.time.Instant;
@@ -13,6 +10,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Stream;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import static io.github.kglowins.gbcontourplot.graphics.PlotUtils.getIsoBandColor;
 import static java.util.Comparator.naturalOrder;
@@ -20,19 +19,33 @@ import static java.util.stream.Collectors.toList;
 import static java.util.stream.IntStream.range;
 import static java.util.stream.IntStream.rangeClosed;
 
-@RequiredArgsConstructor
-@Slf4j
 public class Grid2DValues {
+    private static final Logger log = LoggerFactory.getLogger(Grid2DValues.class);
+
     private final double xMin;
     private final double yMin;
     private final double xCell;
     private final double yCell;
     private final double[][] values;
 
-    @Getter
     private double fMin;
-    @Getter
     private double fMax;
+
+    public Grid2DValues(double xMin, double yMin, double xCell, double yCell, double[][] values) {
+        this.xMin = xMin;
+        this.yMin = yMin;
+        this.xCell = xCell;
+        this.yCell = yCell;
+        this.values = values;
+    }
+
+    public double getFMin() {
+        return fMin;
+    }
+
+    public double getFMax() {
+        return fMax;
+    }
 
     public List<Grid2DCell> toCells() {
         long startMillis = Instant.now().toEpochMilli();

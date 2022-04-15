@@ -2,15 +2,13 @@ package io.github.kglowins.gbcontourplot.colorbar;
 
 import io.github.kglowins.gbcontourplot.colormappers.ColorMapper;
 import io.github.kglowins.gbcontourplot.grid.Grid2DValues;
-import lombok.Setter;
-import lombok.experimental.Accessors;
 import net.sf.javaml.core.Pair;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import java.awt.BasicStroke;
-import java.awt.Color;
-import java.awt.Font;
-import java.awt.Graphics2D;
+import java.awt.*;
 
+import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -26,9 +24,8 @@ import static java.util.stream.Collectors.toList;
 import static java.util.stream.IntStream.range;
 import static java.util.stream.IntStream.rangeClosed;
 
-@Accessors(chain = true, fluent = true)
-@Setter
 public class ColorBarBuilder {
+    private static final Logger LOG = LoggerFactory.getLogger(ColorBarBuilder.class);
 
     // required
     private List<Double> isoLevels;
@@ -45,6 +42,7 @@ public class ColorBarBuilder {
     // optional
     private Font font;
     private String floatingPointTemplate = "%.1f";
+    private List<String> floatingPointTemplates = null;
     private int barLabelSpacing = 10;
     private float barBorderWidth = 1.5f;
     private List<Double> labelLevels;
@@ -68,8 +66,84 @@ public class ColorBarBuilder {
         return this;
     }
 
+    public ColorBarBuilder barBorderWidth(float width) {
+        barBorderWidth = width;
+        return this;
+    }
+
+    public ColorBarBuilder grid2DValues(Grid2DValues grid2DValues) {
+        this.grid2DValues = grid2DValues;
+        return this;
+    }
+
+    public ColorBarBuilder colorMapper(ColorMapper colorMapper) {
+        this.colorMapper = colorMapper;
+        return this;
+    }
+
+    public ColorBarBuilder colorBarLocation(ColorBarLocation colorBarLocation) {
+        this.colorBarLocation = colorBarLocation;
+        return this;
+    }
+
+    public ColorBarBuilder isoLevels(List<Double> isoLevels) {
+        this.isoLevels = isoLevels;
+        return this;
+    }
+
+    public ColorBarBuilder left(Integer left) {
+        this.left = left;
+        return this;
+    }
+
+    public ColorBarBuilder bottom(Integer bottom) {
+        this.bottom = bottom;
+        return this;
+    }
+
+    public ColorBarBuilder width(Integer width) {
+        this.width = width;
+        return this;
+    }
+
+    public ColorBarBuilder height(Integer height) {
+        this.height = height;
+        return this;
+    }
+
+    public ColorBarBuilder font(Font font) {
+        this.font = font;
+        return this;
+    }
+
+    public ColorBarBuilder labelLevels(List<Double> labelLevels) {
+        this.labelLevels = labelLevels;
+        return this;
+    }
+
+    public ColorBarBuilder floatingPointTemplate(String floatingPointTemplate) {
+        this.floatingPointTemplate = floatingPointTemplate;
+        return this;
+    }
+
+    public ColorBarBuilder floatingPointTemplates(List<String> floatingPointTemplates) {
+        this.floatingPointTemplates = floatingPointTemplates;
+        return this;
+    }
+
+    public ColorBarBuilder barLabelSpacing(int barLabelSpacing) {
+        this.barLabelSpacing = barLabelSpacing;
+        return this;
+    }
+
+    public ColorBarBuilder continuous(boolean continuous) {
+        this.continuous = continuous;
+        return this;
+    }
+
     public Consumer<Graphics2D> build() {
         checkIfRequiredParamsProvided();
+        checkIfFloatingPointTemplatesCorrect();
 
         return g2d -> {
             if (nonNull(font)) {
@@ -114,7 +188,11 @@ public class ColorBarBuilder {
                         // TODO find a way for avoiding mirror-reflected strings
                         // better than the below scaling and negative sign for y coordinates
                         g2d.scale(1, -1);
-                        g2d.drawString(String.format((Locale) null, floatingPointTemplate, grid2DValues.getFMin() + (grid2DValues.getFMax() - grid2DValues.getFMin()) * scaledLabelLevels.get(index)),
+                        String fpTemplate = floatingPointTemplate;
+                        if (nonNull(floatingPointTemplates)) {
+                            fpTemplate = floatingPointTemplates.get(index);
+                        }
+                        g2d.drawString(String.format((Locale) null, fpTemplate, grid2DValues.getFMin() + (grid2DValues.getFMax() - grid2DValues.getFMin()) * scaledLabelLevels.get(index)),
                             left + width + barLabelSpacing,
                             -(bottom + (int) Math.round(scaledLabelLevels.get(index) * height) - labelShift)
                         );
@@ -149,6 +227,10 @@ public class ColorBarBuilder {
                     .forEach(index -> {
 
                         // display labels
+                        String fpTemplate = floatingPointTemplate;
+                        if (nonNull(floatingPointTemplates)) {
+                            fpTemplate = floatingPointTemplates.get(index);
+                        }
 
                                 g2d.setColor(Color.BLACK);
                                 int labelYShift = g2d.getFontMetrics().getHeight();
@@ -156,7 +238,7 @@ public class ColorBarBuilder {
                                 // TODO (as above) find a way for avoiding mirror-reflected strings
                                 // better than the below scaling and negative sign for y coordinates
                                 g2d.scale(1, -1);
-                                String label = String.format((Locale) null, floatingPointTemplate, grid2DValues.getFMin() + (grid2DValues.getFMax() - grid2DValues.getFMin()) * scaledLabelLevels.get(index));
+                                String label = String.format((Locale) null, fpTemplate, grid2DValues.getFMin() + (grid2DValues.getFMax() - grid2DValues.getFMin()) * scaledLabelLevels.get(index));
                                 int labelXShift = g2d.getFontMetrics().stringWidth(label) / 2;
                                 g2d.drawString(label, left + (int) Math.round(scaledLabelLevels.get(index) * width) - labelXShift,
                                     -(bottom - barLabelSpacing - labelYShift)
@@ -187,6 +269,15 @@ public class ColorBarBuilder {
         requireNonNull(bottom);
         requireNonNull(width);
         requireNonNull(height);
+    }
+
+    private void checkIfFloatingPointTemplatesCorrect() {
+        if (nonNull(floatingPointTemplates)) {
+            if (!(floatingPointTemplates.size() == isoLevels.size())) {
+                LOG.error("Numer of floating point templates inconsistent with number of isolevels");
+                throw new IllegalStateException();
+            }
+        }
     }
 
     private static List<Double> scaleLabelLevels(List<Double> labelLevels, double dataMin, double dataMax) {

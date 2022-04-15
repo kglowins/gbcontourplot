@@ -1,13 +1,13 @@
 package io.github.kglowins.gbcontourplot.demo;
 
-import io.github.kglowins.gbparameters.gbcd.GbcdCharacteristicGbFinder;
-import io.github.kglowins.gbparameters.gbcd.GbcdCharacteristicGbs;
-import io.github.kglowins.gbparameters.gbcd.GbcdGbLocation;
+import io.github.kglowins.gbparams.gbcd.GbcdCharacteristicGbFinder;
+import io.github.kglowins.gbparams.gbcd.GbcdCharacteristicGbs;
+import io.github.kglowins.gbparams.gbcd.GbcdGbLocation;
 import io.github.kglowins.gbcontourplot.ContourPlot;
-import io.github.kglowins.gbparameters.enums.PointGroup;
-import io.github.kglowins.gbparameters.representation.AxisAngle;
-import io.github.kglowins.gbparameters.representation.Matrix3x3;
-import io.github.kglowins.gbparameters.representation.UnitVector;
+import io.github.kglowins.gbparams.enums.PointGroup;
+import io.github.kglowins.gbparams.representation.AxisAngle;
+import io.github.kglowins.gbparams.representation.Matrix3x3;
+import io.github.kglowins.gbparams.representation.UnitVector;
 
 import java.awt.*;
 import java.awt.geom.Point2D;

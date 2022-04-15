@@ -1,20 +1,20 @@
 package io.github.kglowins.gbcontourplot.grid;
 
-import lombok.extern.slf4j.Slf4j;
 import net.sf.javaml.core.kdtree.KDTree;
 import net.sf.javaml.core.kdtree.KeyDuplicateException;
 import net.sf.javaml.core.kdtree.KeySizeException;
 
 import java.time.Instant;
 import java.util.Collection;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 import static java.util.stream.IntStream.rangeClosed;
 
-@Slf4j
 public class Grid2DInterpolator {
-
+    private static final Logger log = LoggerFactory.getLogger(Grid2DInterpolator.class);
     private static final double EPS_TO_AVOID_DIV_BY_0 = 1e-10;
 
     private int maxNearest = 6;

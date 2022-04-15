@@ -1,9 +1,6 @@
 package io.github.kglowins.gbcontourplot.demo;
 
 import io.github.kglowins.gbcontourplot.grid.Function2DValue;
-import lombok.AllArgsConstructor;
-import lombok.Value;
-import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
@@ -16,11 +13,13 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import static java.util.stream.Collectors.toList;
 
-@Slf4j
 class DataPointsUtils {
+    private static final Logger log = LoggerFactory.getLogger(DataPointsUtils.class);
 
     private static final String WHITESPACE = "\\s+";
 
@@ -66,10 +65,21 @@ class DataPointsUtils {
         }
     }
 
-    @Value
-    @AllArgsConstructor
     private static class PathAndFs {
-        private Path path;
-        private FileSystem fs;
+        private final Path path;
+        private final FileSystem fs;
+
+        public PathAndFs(Path path, FileSystem fs) {
+            this.path = path;
+            this.fs = fs;
+        }
+
+        public Path getPath() {
+            return path;
+        }
+
+        public FileSystem getFs() {
+            return fs;
+        }
     }
 }
